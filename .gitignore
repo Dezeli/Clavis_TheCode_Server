@@ -1,0 +1,158 @@
+# ============================================
+# Python / Django 기본
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django migrations
+**/migrations/*  
+!**/migrations/__init__.py
+
+# SQLite DB (개발용)
+*.sqlite3
+
+# Django static & media
+/staticfiles/
+/media/
+/static/
+/media_root/
+
+# Gunicorn / uWSGI logs
+*.log
+*.pid
+
+# Django secret files
+*.secret
+*.pem
+*.crt
+*.key
+
+
+# ============================================
+# Virtual Environment
+# ============================================
+venv/
+env/
+.venv/
+
+
+# ============================================
+# IDE / Editor
+# ============================================
+# PyCharm
+.idea/
+*.iml
+
+# VSCode
+.vscode/
+.history/
+
+
+# ============================================
+# OS / System Files
+# ============================================
+.DS_Store
+Thumbs.db
+
+
+# ============================================
+# Environment & Config
+# ============================================
+# dotenv (Django settings)
+.env
+.env.*        # e.g., .env.dev, .env.prod, .env.local
+
+# Local tool settings
+*.bak
+*.tmp
+
+
+# ============================================
+# Python packaging
+# ============================================
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+wheels/
+pip-wheel-metadata/
+*.egg-info/
+.installed.cfg
+
+
+# ============================================
+# Bytecode / Cache
+# ============================================
+__pycache__/
+.cache/
+.pytest_cache/
+
+
+# ============================================
+# pytest / Coverage / Test Output
+# ============================================
+.coverage
+htmlcov/
+cov.xml
+coverage.xml
+test-results/
+
+
+# ============================================
+# Node (for Django + React, or build handling)
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+
+
+# ============================================
+# Docker
+# ============================================
+docker-compose.override.yml
+docker-compose*.log
+/tmp/
+**/logs/*
+
+
+# ============================================
+# AWS / Cloud credentials (절대 노출 금지)
+# ============================================
+.aws/
+terraform.tfstate
+terraform.tfstate.backup
+
+
+# ============================================
+# S3 Upload Temp / Cache
+# ============================================
+*.tar.gz
+*.zip
+
+
+# ============================================
+# Frontend build output (if served by Django)
+# ============================================
+frontend/build/
+frontend/dist/
+frontend/.next/
+
+
+# ============================================
+# Misc
+# ============================================
+*.swp
+*.swo
+.idea/
+.vscode/
