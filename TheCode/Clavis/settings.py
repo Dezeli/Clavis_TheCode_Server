@@ -1,12 +1,17 @@
 from pathlib import Path
+from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-xsx-g(^zlb!_nt=di^6ewuggv6cjgg^s8p#trn^n2y5(ml5od1"
+# ENVS
+SECRET_KEY = config("DJANGO_SECRET_KEY")
+GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = config("GOOGLE_CLIENT_SECRET")
+GOOGLE_REDIRECT_URI = config("GOOGLE_REDIRECT_URI")
 
-DEBUG = True
+DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default="").split(",")
 
 
 INSTALLED_APPS = [
@@ -16,6 +21,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     "accounts.apps.AccountsConfig",
     "commerce.apps.CommerceConfig",
     "contents.apps.ContentsConfig",
@@ -88,3 +94,5 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
