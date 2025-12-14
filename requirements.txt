@@ -1,0 +1,10 @@
+Django>=6.0
+djangorestframework>=3.16
+django-cors-headers>=4.9
+
+python-decouple>=3.8
+
+google-auth>=2.43
+requests>=2.32
+
+PyJWT>=2.10
