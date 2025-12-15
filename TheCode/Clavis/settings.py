@@ -5,31 +5,34 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ENVS
 SECRET_KEY = config("DJANGO_SECRET_KEY")
-GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = config("GOOGLE_CLIENT_SECRET")
-GOOGLE_REDIRECT_URI = config("GOOGLE_REDIRECT_URI")
+GOOGLE_AUTH_CLIENT_ID = config("GOOGLE_AUTH_CLIENT_ID")
 
 DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default="").split(",")
-
+CORS_ALLOW_ALL_ORIGINS = True
 
 INSTALLED_APPS = [
+    "corsheaders",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
 
-    "accounts.apps.AccountsConfig",
-    "commerce.apps.CommerceConfig",
-    "contents.apps.ContentsConfig",
-    "logs.apps.LogsConfig",
-    "progress.apps.ProgressConfig",
+    "accounts",
+    "commerce",
+    "contents",
+    "logs",
+    "progress",
 ]
 
+AUTH_USER_MODEL = "accounts.User"
+
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
