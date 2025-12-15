@@ -77,3 +77,78 @@ class GoogleLoginView(APIView):
                 },
             },
         )
+    
+
+class RefreshTokenView(APIView):
+    def post(self, request):
+        refresh_token = request.data.get("refresh_token")
+        if not refresh_token:
+            return error_response("refresh_token 값이 필요합니다.")
+
+        try:
+            stored = StoredRefreshToken.objects.get(
+                token=refresh_token,
+                revoked=False,
+            )
+        except StoredRefreshToken.DoesNotExist:
+            return error_response("유효하지 않은 refresh token 입니다.")
+
+        if stored.expires_at < timezone.now():
+            return error_response("만료된 refresh token 입니다.")
+
+        try:
+            payload = jwt.decode(
+                refresh_token,
+                settings.SECRET_KEY,
+                algorithms=["HS256"],
+            )
+        except jwt.ExpiredSignatureError:
+            return error_response("refresh token이 만료되었습니다.")
+        except jwt.InvalidTokenError:
+            return error_response("손상된 refresh token 입니다.")
+
+        user_id = payload.get("user_id")
+        if not user_id:
+            return error_response("user_id 가 없는 토큰입니다.")
+
+        try:
+            user = User.objects.get(id=user_id, is_active=True)
+        except User.DoesNotExist:
+            return error_response("존재하지 않는 사용자입니다.")
+
+        access_payload = {
+            "user_id": user.id,
+            "exp": timezone.now() + timedelta(minutes=60),
+        }
+        access_token = jwt.encode(
+            access_payload,
+            settings.SECRET_KEY,
+            algorithm="HS256",
+        )
+
+        return success_response(
+            message="access token 재발급 성공",
+            data={
+                "access_token": access_token,
+            },
+        )
+    
+
+class LogoutView(APIView):
+    def post(self, request):
+        refresh_token = request.data.get("refresh_token")
+        if not refresh_token:
+            return error_response("refresh_token 값이 필요합니다.")
+
+        try:
+            stored = StoredRefreshToken.objects.get(token=refresh_token)
+        except StoredRefreshToken.DoesNotExist:
+            return error_response("유효하지 않은 토큰입니다.")
+
+        if stored.revoked:
+            return error_response("이미 로그아웃된 상태입니다.")
+
+        stored.revoked = True
+        stored.save(update_fields=["revoked"])
+
+        return success_response(message="로그아웃 성공")
