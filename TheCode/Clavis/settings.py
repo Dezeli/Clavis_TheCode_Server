@@ -12,6 +12,12 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default="").split(",")
 CORS_ALLOW_ALL_ORIGINS = True
 
+AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
+AWS_REGION = config("AWS_REGION")
+AWS_STAGE_BUCKET = config("AWS_STAGE_BUCKET")
+
+
 INSTALLED_APPS = [
     "corsheaders",
     "django.contrib.admin",
