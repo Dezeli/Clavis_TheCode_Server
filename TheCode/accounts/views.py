@@ -118,7 +118,8 @@ class RefreshTokenView(APIView):
 
         access_payload = {
             "user_id": user.id,
-            "exp": timezone.now() + timedelta(minutes=60),
+            # "exp": timezone.now() + timedelta(minutes=60),
+            "exp": timezone.now() + timedelta(minutes=1),
         }
         access_token = jwt.encode(
             access_payload,
@@ -152,3 +153,49 @@ class LogoutView(APIView):
         stored.save(update_fields=["revoked"])
 
         return success_response(message="로그아웃 성공")
+
+
+class MeView(APIView):
+    def get(self, request):
+        # Authorization 헤더에서 Bearer 토큰 추출
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return error_response("Authorization 헤더가 필요합니다.", status=401)
+
+        access_token = auth_header.split("Bearer ")[1]
+        if not access_token:
+            return error_response("Access Token이 필요합니다.", status=401)
+
+        try:
+            # JWT 토큰 디코딩
+            payload = jwt.decode(
+                access_token,
+                settings.SECRET_KEY,
+                algorithms=["HS256"],
+            )
+        except jwt.ExpiredSignatureError:
+            return error_response("만료된 Access Token입니다.", status=401)
+        except jwt.InvalidTokenError:
+            return error_response("유효하지 않은 Access Token입니다.", status=401)
+
+        user_id = payload.get("user_id")
+        if not user_id:
+            return error_response("user_id가 없는 토큰입니다.", status=401)
+
+        try:
+            user = User.objects.get(id=user_id, is_active=True)
+        except User.DoesNotExist:
+            return error_response("존재하지 않는 사용자입니다.", status=404)
+
+        return success_response(
+            message="사용자 정보 조회 성공",
+            data={
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "username": user.username,
+                    "provider": user.provider,
+                    "created_at": user.created_at.isoformat() if user.created_at else None,
+                }
+            },
+        )
