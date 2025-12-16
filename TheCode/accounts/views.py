@@ -47,13 +47,15 @@ class GoogleLoginView(APIView):
 
         access_payload = {
             "user_id": user.id,
-            "exp": timezone.now() + timedelta(minutes=60),
+            # "exp": timezone.now() + timedelta(minutes=60),
+            "exp": timezone.now() + timedelta(minutes=1),
         }
         access_token = jwt.encode(access_payload, settings.SECRET_KEY, algorithm="HS256")
 
         refresh_payload = {
             "user_id": user.id,
-            "exp": timezone.now() + timedelta(days=7),
+            # "exp": timezone.now() + timedelta(days=7),
+            "exp": timezone.now() + timedelta(minutes=2),
         }
         refresh_token = jwt.encode(refresh_payload, settings.SECRET_KEY, algorithm="HS256")
 
@@ -78,6 +80,64 @@ class GoogleLoginView(APIView):
             },
         )
     
+
+class DevTestLoginView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        provider = "google"
+        provider_user_id = "dev-google-user-001"
+        email = "dev@test.com"
+        username = "dev_user"
+
+        user, created = User.objects.get_or_create(
+            provider=provider,
+            provider_user_id=provider_user_id,
+            defaults={
+                "email": email,
+                "username": username,
+            },
+        )
+
+        access_payload = {
+            "user_id": user.id,
+            "exp": timezone.now() + timedelta(minutes=60),
+        }
+        access_token = jwt.encode(
+            access_payload, settings.SECRET_KEY, algorithm="HS256"
+        )
+
+        refresh_payload = {
+            "user_id": user.id,
+            "exp": timezone.now() + timedelta(days=7),
+        }
+        refresh_token = jwt.encode(
+            refresh_payload, settings.SECRET_KEY, algorithm="HS256"
+        )
+
+        StoredRefreshToken.objects.create(
+            user=user,
+            token=refresh_token,
+            device_info=request.headers.get("User-Agent", ""),
+            session_scope="google",
+            expires_at=timezone.now() + timedelta(days=7),
+        )
+
+        return success_response(
+            message="DEV 테스트 로그인 성공",
+            data={
+                "access_token": access_token,
+                "refresh_token": refresh_token,
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "username": user.username,
+                    "is_dev": True,
+                },
+            },
+        )
+
+
 
 class RefreshTokenView(APIView):
     def post(self, request):
