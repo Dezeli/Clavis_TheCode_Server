@@ -217,7 +217,6 @@ class LogoutView(APIView):
 
 class MeView(APIView):
     def get(self, request):
-        # Authorization 헤더에서 Bearer 토큰 추출
         auth_header = request.headers.get("Authorization", "")
         if not auth_header.startswith("Bearer "):
             return error_response("Authorization 헤더가 필요합니다.", status=401)
@@ -227,7 +226,6 @@ class MeView(APIView):
             return error_response("Access Token이 필요합니다.", status=401)
 
         try:
-            # JWT 토큰 디코딩
             payload = jwt.decode(
                 access_token,
                 settings.SECRET_KEY,
@@ -251,11 +249,9 @@ class MeView(APIView):
             message="사용자 정보 조회 성공",
             data={
                 "user": {
-                    "id": user.id,
-                    "email": user.email,
                     "username": user.username,
+                    "email": user.email,
                     "provider": user.provider,
-                    "created_at": user.created_at.isoformat() if user.created_at else None,
                 }
             },
         )
