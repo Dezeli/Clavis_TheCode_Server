@@ -18,7 +18,7 @@ class GoogleLoginView(APIView):
     def post(self, request):
         token = request.data.get("id_token")
         if not token:
-            return error_response("id_token 값이 필요합니다.")
+            return error_response("id_token 값이 필요합니다.", status=400)
 
         try:
             decoded = google_id_token.verify_oauth2_token(
@@ -28,22 +28,23 @@ class GoogleLoginView(APIView):
             )
         except Exception as e:
             return error_response(
-                "유효하지 않은 Google ID Token 입니다.",
+                "유효하지 않은 Google ID Token입니다.",
                 data={"detail": str(e)},
+                status=401
             )
 
         if decoded.get("iss") not in [
             "accounts.google.com",
             "https://accounts.google.com",
         ]:
-            return error_response("잘못된 issuer 입니다.")
+            return error_response("유효하지 않은 Google ID Token입니다.", status=401)
 
         provider_user_id = decoded.get("sub")
         email = decoded.get("email") or ""
         username = decoded.get("name") or ""
 
         if not provider_user_id:
-            return error_response("provider_user_id 없음")
+            return error_response("유효하지 않은 Google ID Token입니다.", status=401)
 
         user, created = User.objects.get_or_create(
             provider="google",
@@ -72,7 +73,7 @@ class GoogleLoginView(APIView):
         )
 
         return success_response(
-            message="로그인 성공",
+            message="로그인에 성공했습니다.",
             data={
                 "access_token": str(access),
                 "refresh_token": str(refresh),
@@ -115,7 +116,7 @@ class DevTestLoginView(APIView):
 
 
         return success_response(
-            message="DEV 테스트 로그인 성공",
+            message="DEV 테스트 로그인에 성공했습니다.",
             data={
                 "access_token": str(access),
                 "refresh_token": str(refresh),
@@ -135,7 +136,7 @@ class RefreshTokenView(APIView):
     def post(self, request):
         refresh_token_str = request.data.get("refresh_token")
         if not refresh_token_str:
-            return error_response("refresh_token 값이 필요합니다.")
+            return error_response("refresh_token 값이 필요합니다.", status=400)
 
         try:
             stored = StoredRefreshToken.objects.get(
@@ -143,20 +144,20 @@ class RefreshTokenView(APIView):
                 revoked=False,
             )
         except StoredRefreshToken.DoesNotExist:
-            return error_response("유효하지 않은 refresh token 입니다.")
+            return error_response("유효하지 않은 Refresh Token입니다.", status=401)
 
         if stored.expires_at < timezone.now():
-            return error_response("만료된 refresh token 입니다.")
+            return error_response("만료된 Refresh Token입니다.", status=401)
 
         try:
             refresh = RefreshToken(refresh_token_str)
         except TokenError:
-            return error_response("유효하지 않거나 만료된 refresh token 입니다.")
+            return error_response("유효하지 않은 Refresh Token입니다.", status=401)
 
         access = refresh.access_token
 
         return success_response(
-            message="access token 재발급 성공",
+            message="Access Token 재발급에 성공했습니다.",
             data={
                 "access_token": str(access),
             },
@@ -169,19 +170,19 @@ class LogoutView(APIView):
     def post(self, request):
         refresh_token = request.data.get("refresh_token")
         if not refresh_token:
-            return error_response("refresh_token 값이 필요합니다.")
+            return error_response("refresh_token 값이 필요합니다.", status=400)
 
         try:
             stored = StoredRefreshToken.objects.get(token=refresh_token)
         except StoredRefreshToken.DoesNotExist:
-            return error_response("유효하지 않은 토큰입니다.")
+            return error_response("유효하지 않은 Refresh Token입니다.", status=401)
 
         try:
             refresh = RefreshToken(refresh_token)
         except TokenError:
             stored.revoked = True
             stored.save(update_fields=["revoked"])
-            return success_response(message="로그아웃 성공")
+            return success_response(message="로그아웃에 성공했습니다.")
 
         if stored.revoked:
             return success_response(message="이미 로그아웃 된 토큰입니다.")
@@ -189,7 +190,7 @@ class LogoutView(APIView):
         stored.revoked = True
         stored.save(update_fields=["revoked"])
 
-        return success_response(message="로그아웃 성공")
+        return success_response(message="로그아웃에 성공했습니다.")
 
 
 
@@ -200,7 +201,7 @@ class MeView(APIView):
         user = request.user
 
         return success_response(
-            message="사용자 정보 조회 성공",
+            message="사용자 정보입니다.",
             data={
                 "user": {
                     "id": user.id,

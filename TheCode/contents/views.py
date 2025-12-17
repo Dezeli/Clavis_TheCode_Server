@@ -18,7 +18,7 @@ class StageDetailView(APIView):
                 stage_no=stage_no,
             )
         except Stage.DoesNotExist:
-            return error_response("스테이지가 존재하지 않습니다.")
+            return error_response("스테이지가 존재하지 않습니다.", status=404)
 
         next_stage = (
             Stage.objects.filter(
@@ -43,7 +43,7 @@ class StageDetailView(APIView):
             )
 
         return success_response(
-            message="문제 정보 호출 성공",
+            message="스테이지 정보입니다.",
             data={
                 "stage_no": stage.stage_no,
                 "title": stage.title,
@@ -61,7 +61,7 @@ class StageAnswerView(APIView):
     def post(self, request, episode_id, stage_no):
         answer = request.data.get("answer")
         if not answer:
-            return error_response("answer 값이 필요합니다.")
+            return error_response("answer 값이 필요합니다.", status=400)
 
         try:
             stage = Stage.objects.get(
@@ -69,7 +69,7 @@ class StageAnswerView(APIView):
                 stage_no=stage_no,
             )
         except Stage.DoesNotExist:
-            return error_response("스테이지가 존재하지 않습니다.")
+            return error_response("스테이지가 존재하지 않습니다.", status=404)
 
         is_correct = normalize_answer(answer) == normalize_answer(stage.answer_text)
 
@@ -94,15 +94,15 @@ class StageHintView(APIView):
                 stage_no=stage_no,
             )
         except Stage.DoesNotExist:
-            return error_response("스테이지가 존재하지 않습니다.")
+            return error_response("스테이지가 존재하지 않습니다.", status=404)
 
         try:
             hint = stage.hint
         except Hint.DoesNotExist:
-            return error_response("해당 문제에는 힌트가 없습니다.")
+            return error_response("해당 문제에는 힌트가 없습니다.", status=404)
 
         return success_response(
-            message="힌트 조회 성공",
+            message="힌트 정보입니다.",
             data={
                 "content": hint.content,
             },
