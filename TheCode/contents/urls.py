@@ -1,6 +1,8 @@
 from django.urls import path
-from .views import StageImageProxyView
+from .views import StageDetailView, StageAnswerView, StageHintView
 
 urlpatterns = [
-    path("stages/<int:stage_id>/image/", StageImageProxyView.as_view()),
+    path("<int:episode_id>/<int:stage_no>/", StageDetailView.as_view()),
+    path("<int:episode_id>/<int:stage_no>/answer/", StageAnswerView.as_view()),
+    path("<int:episode_id>/<int:stage_no>/hint/", StageHintView.as_view()),
 ]
