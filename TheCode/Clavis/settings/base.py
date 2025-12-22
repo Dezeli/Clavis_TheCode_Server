@@ -11,7 +11,7 @@ GOOGLE_AUTH_CLIENT_ID = config("GOOGLE_AUTH_CLIENT_ID")
 
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default="").split(",")
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="").split(",")
 CORS_ALLOW_ALL_ORIGINS = True
 
 AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
@@ -35,7 +35,6 @@ INSTALLED_APPS = [
     "progress",
 ]
 
-AUTH_USER_MODEL = "accounts.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -78,7 +77,7 @@ ROOT_URLCONF = "Clavis.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, 'templates')],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -100,11 +99,13 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+
+AUTH_USER_MODEL = "accounts.User"
 LANGUAGE_CODE = "ko-kr"
 TIME_ZONE = "Asia/Seoul"
-
 USE_I18N = True
 USE_TZ = True
+
 
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
