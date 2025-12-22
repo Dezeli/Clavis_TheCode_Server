@@ -8,3 +8,6 @@ google-auth>=2.43
 requests>=2.32
 
 PyJWT>=2.10
+
+
+boto3>=1.42.9
