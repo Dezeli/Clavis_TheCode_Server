@@ -1,0 +1,30 @@
+services:
+  web:
+    build: .
+    container_name: thecode-web
+    env_file:
+      - .env
+    expose:
+      - "8000"
+    restart: unless-stopped
+    command: >
+      gunicorn Clavis.asgi:application
+      --chdir TheCode
+      --bind 0.0.0.0:8000
+      --workers 3
+      --timeout 60
+      -k uvicorn.workers.UvicornWorker
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: thecode-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/default.prod.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./TheCode/staticfiles:/app/TheCode/staticfiles:ro
+      - ./certbot:/etc/letsencrypt
+    depends_on:
+      - web
+    restart: unless-stopped
