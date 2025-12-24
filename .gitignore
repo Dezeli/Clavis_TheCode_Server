@@ -5,9 +5,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Django migrations
-**/migrations/*  
-!**/migrations/__init__.py
 
 # SQLite DB (개발용)
 *.sqlite3
