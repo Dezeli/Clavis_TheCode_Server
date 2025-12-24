@@ -1,0 +1,15 @@
+#changelist-form {
+    text-align: left !important;
+}
+
+#result_list {
+    display: inline-table !important;
+    width: auto !important;
+    table-layout: auto !important;
+}
+
+#result_list th,
+#result_list td {
+    text-align: center !important;
+    white-space: nowrap !important;
+}
