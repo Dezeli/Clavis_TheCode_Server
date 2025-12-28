@@ -9,7 +9,7 @@ class Series(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.code} - {self.title}"
+        return f"{self.title}"
     
 
 class Episode(models.Model):
@@ -33,7 +33,7 @@ class Episode(models.Model):
         unique_together = ("series", "code")
 
     def __str__(self):
-        return f"{self.series.code}:{self.code}"
+        return f"{self.series} - {self.title}"
 
 
 class Stage(models.Model):
@@ -67,7 +67,7 @@ class Stage(models.Model):
         ordering = ["stage_no"]
 
     def __str__(self):
-        return f"{self.episode.code} - Stage {self.stage_no}"
+        return f"{self.episode} | {self.stage_no}. {self.title}"
 
 
 class Hint(models.Model):

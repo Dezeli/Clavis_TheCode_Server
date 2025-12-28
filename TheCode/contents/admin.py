@@ -294,7 +294,7 @@ class StageAdmin(admin.ModelAdmin):
     def colored_episode(self, obj):
         color = "#2ecc71" if obj.is_free else "#5dade2"
         return format_html(
-            '<span style="color:{}; font-weight:600;">{} / {}</span>',
+            '<span style="color:{}; font-weight:600;">{} - {}</span>',
             color,
             obj.episode.series.title,
             obj.episode.title,
@@ -337,7 +337,7 @@ class StageAdmin(admin.ModelAdmin):
         color = "#2ecc71" if obj.next_stage.is_free else "#5dade2"
 
         return format_html(
-            '<span style="color:{}; font-weight:600;">{} / {}</span>',
+            '<span style="color:{}; font-weight:600;">{} | {}</span>',
             color,
             obj.next_stage.episode.title,
             obj.next_stage.title,
@@ -407,7 +407,7 @@ class HintAdmin(admin.ModelAdmin):
     def colored_episode(self, obj):
         color = "#2ecc71" if obj.stage.is_free else "#5dade2"
         return format_html(
-            '<span style="color:{}; font-weight:600;">{} / {}</span>',
+            '<span style="color:{}; font-weight:600;">{} - {}</span>',
             color,
             obj.stage.episode.series.title,
             obj.stage.episode.title,
