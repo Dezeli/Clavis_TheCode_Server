@@ -68,7 +68,7 @@ class StoredRefreshToken(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="refresh_tokens")
     token = models.CharField(max_length=500)
     device_info = models.CharField(max_length=255, null=True, blank=True)
-    session_scope = models.CharField(max_length=20, default="user")
+    session_scope = models.CharField(max_length=20, default="local")
 
     revoked = models.BooleanField(default=False)
     expires_at = models.DateTimeField()
