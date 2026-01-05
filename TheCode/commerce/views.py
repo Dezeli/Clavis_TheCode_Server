@@ -17,12 +17,12 @@ class AdMobSSVView(View):
     def get(self, request):
         query_string = request.META.get('QUERY_STRING', '')
         user_social_id = request.GET.get('user_id')
-        stage_id = request.GET.get('custom_data')
+        custom_data_raw = request.GET.get('custom_data')
         transaction_id = request.GET.get('transaction_id')
         signature = request.GET.get('signature')
         key_id = request.GET.get('key_id')
 
-        if not all([user_social_id, stage_id, transaction_id, signature, key_id]):
+        if not all([user_social_id, custom_data_raw, transaction_id, signature, key_id]):
             return HttpResponseBadRequest("Missing parameters")
 
         if AdEvent.objects.filter(transaction_id=transaction_id).exists():
@@ -32,15 +32,24 @@ class AdMobSSVView(View):
             return HttpResponseBadRequest("Invalid signature")
 
         try:
+            try:
+                ep_code, s_no = custom_data_raw.split('|')
+            except ValueError:
+                return HttpResponseBadRequest("Invalid custom_data format. Expected 'EP_CODE|STAGE_NO'")
+
             with transaction.atomic():
                 user = User.objects.get(provider_user_id=user_social_id)
-                stage = Stage.objects.get(id=stage_id)
+                stage = Stage.objects.get(
+                    episode__code=ep_code, 
+                    stage_no=s_no
+                )
 
                 ad_event = AdEvent.objects.create(
                     user=user,
                     stage=stage,
                     transaction_id=transaction_id
                 )
+
                 UserStageHintAccess.objects.get_or_create(
                     user=user,
                     stage=stage,
@@ -48,12 +57,17 @@ class AdMobSSVView(View):
                         'ad_event': ad_event,
                     }
                 )
+            
             return HttpResponse(status=200)
-        except (User.DoesNotExist, Stage.DoesNotExist):
-            return HttpResponseBadRequest("User or Stage not found")
+
+        except User.DoesNotExist:
+            return HttpResponseBadRequest("User not found")
+        except Stage.DoesNotExist:
+            return HttpResponseBadRequest("Stage not found")
         except Exception as e:
             print(f"Error detail: {e}")
             return HttpResponse(status=500)
+        
 
     def verify_signature(self, query_string, signature, key_id):
         return True
