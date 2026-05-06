@@ -204,7 +204,7 @@ class MeView(APIView):
             message="사용자 정보입니다.",
             data={
                 "user": {
-                    "id": user.id,
+                    "p_id": user.provider_user_id,
                     "username": user.username,
                     "email": user.email,
                     "provider": user.provider,

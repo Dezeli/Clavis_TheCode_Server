@@ -1,56 +1,20 @@
 from django.contrib import admin
-from commerce.models import (
-    UserEntitlement,
-    PaymentEvent,
-    AdEvent,
-    UserStageHintAccess,
-)
-
-@admin.register(UserEntitlement)
-class UserEntitlementAdmin(admin.ModelAdmin):
-    list_display = (
-        "user",
-        "type",
-        "episode",
-        "granted_at",
-        "expires_at",
-    )
-    list_filter = ("type",)
-    search_fields = ("user__email", "user__username")
-
-@admin.register(PaymentEvent)
-class PaymentEventAdmin(admin.ModelAdmin):
-    list_display = (
-        "user",
-        "episode",
-        "event_type",
-        "store",
-        "amount",
-        "currency",
-        "created_at",
-    )
-    list_filter = ("event_type", "store")
-    search_fields = ("user__email", "product_id")
+from .models import AdEvent, UserStageHintAccess, UserEntitlement
 
 @admin.register(AdEvent)
 class AdEventAdmin(admin.ModelAdmin):
-    list_display = (
-        "user",
-        "stage",
-        "ad_network",
-        "reward_type",
-        "reward_amount",
-        "watched_at",
-    )
-    list_filter = ("ad_network", "reward_type")
+    list_display = ('user', 'stage', 'transaction_id', 'watched_at')
+    search_fields = ('user__social_id', 'transaction_id')
+    list_filter = ('watched_at',)
 
 @admin.register(UserStageHintAccess)
 class UserStageHintAccessAdmin(admin.ModelAdmin):
-    list_display = (
-        "user",
-        "stage",
-        "unlock_source",
-        "unlocked_at",
-    )
-    list_filter = ("unlock_source",)
-    search_fields = ("user__email",)
+    list_display = ('user', 'stage', 'unlocked_at')
+    search_fields = ('user__social_id', 'stage__name')
+    list_filter = ('unlocked_at',)
+
+@admin.register(UserEntitlement)
+class UserEntitlementAdmin(admin.ModelAdmin):
+    list_display = ('user', 'entitlement_type', 'granted_at', 'expires_at')
+    search_fields = ('user__social_id', 'entitlement_type')
+    list_filter = ('entitlement_type', 'granted_at')
