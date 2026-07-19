@@ -15,6 +15,10 @@ __pycache__/
 /static/
 /media_root/
 
+# Local seed content manifests
+/seeds/*.json
+/seed_data/
+
 # Gunicorn / uWSGI logs
 *.log
 *.pid

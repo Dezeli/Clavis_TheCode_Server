@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 from contents.models import Hint, Stage
 from django.conf import settings
 from rest_framework.permissions import IsAuthenticated
@@ -6,7 +8,32 @@ from utils.response import success_response, error_response
 from utils.s3 import get_s3_client
 
 
-s3 = get_s3_client()
+def build_stage_image_url(request, image_key):
+    if not image_key:
+        return None
+
+    if image_key.startswith("http://") or image_key.startswith("https://"):
+        return image_key
+
+    if settings.MEDIA_URL and not image_key.startswith("s3://"):
+        return request.build_absolute_uri(urljoin(settings.MEDIA_URL, image_key))
+
+    s3 = get_s3_client()
+    if not s3 or not settings.AWS_STAGE_BUCKET:
+        return None
+
+    key = image_key.removeprefix("s3://")
+    if "/" in key and key.split("/", 1)[0] == settings.AWS_STAGE_BUCKET:
+        key = key.split("/", 1)[1]
+
+    return s3.generate_presigned_url(
+        ClientMethod="get_object",
+        Params={
+            "Bucket": settings.AWS_STAGE_BUCKET,
+            "Key": key,
+        },
+        ExpiresIn=60,
+    )
 
 
 class StageDetailView(APIView):
@@ -31,16 +58,7 @@ class StageDetailView(APIView):
 
         next_stage_no = next_stage.stage_no if next_stage else None
 
-        image_url = None
-        if stage.image_key:
-            image_url = s3.generate_presigned_url(
-                ClientMethod="get_object",
-                Params={
-                    "Bucket": settings.AWS_STAGE_BUCKET,
-                    "Key": stage.image_key,
-                },
-                ExpiresIn=60,
-            )
+        image_url = build_stage_image_url(request, stage.image_key)
 
         return success_response(
             message="스테이지 정보입니다.",
