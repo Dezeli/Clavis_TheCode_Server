@@ -1,4 +1,6 @@
 import base64
+from urllib.parse import unquote
+
 import requests
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -131,7 +133,7 @@ class AdMobSSVView(View):
             sig_bytes = base64.urlsafe_b64decode(raw_signature + padding)
             public_key.verify(
                 sig_bytes,
-                message.encode("utf-8"),
+                unquote(message).encode("utf-8"),
                 ec.ECDSA(hashes.SHA256()),
             )
             return True
