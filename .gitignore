@@ -11,7 +11,9 @@ __pycache__/
 
 # Django static & media
 /staticfiles/
+/TheCode/staticfiles/
 /media/
+/TheCode/media/
 /static/
 /media_root/
 

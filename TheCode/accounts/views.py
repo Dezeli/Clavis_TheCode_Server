@@ -79,6 +79,7 @@ class GoogleLoginView(APIView):
                 "refresh_token": str(refresh),
                 "user": {
                     "id": user.id,
+                    "provider_user_id": user.provider_user_id,
                     "email": user.email,
                     "username": user.username,
                 },
@@ -122,6 +123,7 @@ class DevTestLoginView(APIView):
                 "refresh_token": str(refresh),
                 "user": {
                     "id": user.id,
+                    "provider_user_id": user.provider_user_id,
                     "email": user.email,
                     "username": user.username,
                 },
@@ -204,7 +206,9 @@ class MeView(APIView):
             message="사용자 정보입니다.",
             data={
                 "user": {
+                    "id": user.id,
                     "p_id": user.provider_user_id,
+                    "provider_user_id": user.provider_user_id,
                     "username": user.username,
                     "email": user.email,
                     "provider": user.provider,

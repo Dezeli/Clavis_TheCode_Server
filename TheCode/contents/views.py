@@ -1,6 +1,7 @@
 from urllib.parse import urljoin
 
-from contents.models import Hint, Stage
+from commerce.models import UserStageHintAccess
+from contents.models import Episode, Hint, Stage
 from django.conf import settings
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -36,6 +37,39 @@ def build_stage_image_url(request, image_key):
     )
 
 
+class StartStageView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        episode = (
+            Episode.objects.filter(
+                is_released=True,
+                series__is_active=True,
+                stages__isnull=False,
+            )
+            .select_related("series")
+            .order_by("series__code", "code", "id")
+            .distinct()
+            .first()
+        )
+
+        if not episode:
+            return error_response("Released episode does not exist.", status=404)
+
+        stage = episode.stages.order_by("stage_no").first()
+        if not stage:
+            return error_response("Start stage does not exist.", status=404)
+
+        return success_response(
+            message="Start stage information.",
+            data={
+                "episode_id": episode.id,
+                "episode_code": episode.code,
+                "stage_no": stage.stage_no,
+            },
+        )
+
+
 class StageDetailView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request, episode_id, stage_no):
@@ -63,6 +97,8 @@ class StageDetailView(APIView):
         return success_response(
             message="스테이지 정보입니다.",
             data={
+                "episode_id": stage.episode_id,
+                "episode_code": stage.episode.code,
                 "stage_no": stage.stage_no,
                 "title": stage.title,
                 "image_url": image_url,
@@ -118,6 +154,12 @@ class StageHintView(APIView):
             hint = stage.hint
         except Hint.DoesNotExist:
             return error_response("해당 문제에는 힌트가 없습니다.", status=404)
+
+        if not UserStageHintAccess.objects.filter(
+            user=request.user,
+            stage=stage,
+        ).exists():
+            return error_response("Hint access requires a rewarded ad.", status=403)
 
         return success_response(
             message="힌트 정보입니다.",
