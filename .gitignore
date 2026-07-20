@@ -11,9 +11,15 @@ __pycache__/
 
 # Django static & media
 /staticfiles/
+/TheCode/staticfiles/
 /media/
+/TheCode/media/
 /static/
 /media_root/
+
+# Local seed content manifests
+/seeds/*.json
+/seed_data/
 
 # Gunicorn / uWSGI logs
 *.log
