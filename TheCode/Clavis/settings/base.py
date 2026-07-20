@@ -19,6 +19,16 @@ AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY", default="")
 AWS_REGION = config("AWS_REGION", default="")
 AWS_STAGE_BUCKET = config("AWS_STAGE_BUCKET", default="")
 
+GOOGLE_PLAY_PACKAGE_NAME = config("GOOGLE_PLAY_PACKAGE_NAME", default="")
+GOOGLE_PLAY_SERVICE_ACCOUNT_FILE = config(
+    "GOOGLE_PLAY_SERVICE_ACCOUNT_FILE",
+    default="",
+)
+GOOGLE_PLAY_SERVICE_ACCOUNT_JSON = config(
+    "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON",
+    default="",
+)
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",

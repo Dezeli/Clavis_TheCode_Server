@@ -1,6 +1,8 @@
 from urllib.parse import urljoin
 
 from commerce.models import UserStageHintAccess
+from commerce.entitlements import user_has_entitlement
+from commerce.purchase_products import ENTITLEMENT_HINT_AD_REMOVAL
 from contents.models import Episode, Hint, Stage
 from django.conf import settings
 from rest_framework.permissions import IsAuthenticated
@@ -155,7 +157,10 @@ class StageHintView(APIView):
         except Hint.DoesNotExist:
             return error_response("해당 문제에는 힌트가 없습니다.", status=404)
 
-        if not UserStageHintAccess.objects.filter(
+        if not user_has_entitlement(
+            request.user,
+            ENTITLEMENT_HINT_AD_REMOVAL,
+        ) and not UserStageHintAccess.objects.filter(
             user=request.user,
             stage=stage,
         ).exists():
