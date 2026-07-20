@@ -11,10 +11,72 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import load_der_public_key
 
-from .models import AdEvent, UserStageHintAccess
+from .entitlements import serialize_entitlements, user_has_entitlement
+from .google_play import GooglePlayPurchaseVerifier, GooglePlayVerificationError
+from .models import AdEvent, PurchaseEvent, UserEntitlement, UserStageHintAccess
+from .purchase_products import (
+    ALL_PRODUCT_IDS,
+    ENTITLEMENT_HINT_AD_REMOVAL,
+    PRODUCT_ENTITLEMENTS,
+)
 from accounts.models import User
 from contents.models import Stage
 from utils.response import error_response, success_response
+
+
+class EntitlementStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return success_response(
+            message="Entitlement status.",
+            data=serialize_entitlements(request.user),
+        )
+
+
+class GooglePlayPurchaseVerifyView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        product_id = request.data.get("product_id")
+        purchase_token = request.data.get("purchase_token")
+
+        if not product_id or not purchase_token:
+            return error_response("product_id and purchase_token are required.", status=400)
+
+        if product_id not in ALL_PRODUCT_IDS:
+            return error_response("Unsupported product_id.", status=400)
+
+        try:
+            payload = GooglePlayPurchaseVerifier().verify_product_purchase(
+                product_id=product_id,
+                purchase_token=purchase_token,
+            )
+        except GooglePlayVerificationError as exc:
+            return error_response(str(exc), status=400)
+
+        with transaction.atomic():
+            PurchaseEvent.objects.update_or_create(
+                purchase_token=purchase_token,
+                defaults={
+                    "user": request.user,
+                    "store": PurchaseEvent.STORE_GOOGLE_PLAY,
+                    "product_id": product_id,
+                    "order_id": payload.get("orderId"),
+                    "payload_json": payload,
+                },
+            )
+
+            for entitlement_type in PRODUCT_ENTITLEMENTS[product_id]:
+                UserEntitlement.objects.get_or_create(
+                    user=request.user,
+                    entitlement_type=entitlement_type,
+                )
+
+        return success_response(
+            message="Purchase verified.",
+            data=serialize_entitlements(request.user),
+        )
 
 
 class HintAccessStatusView(APIView):
@@ -29,10 +91,10 @@ class HintAccessStatusView(APIView):
         except Stage.DoesNotExist:
             return error_response("Stage does not exist.", status=404)
 
-        has_access = UserStageHintAccess.objects.filter(
-            user=request.user,
-            stage=stage,
-        ).exists()
+        has_access = user_has_entitlement(
+            request.user,
+            ENTITLEMENT_HINT_AD_REMOVAL,
+        ) or UserStageHintAccess.objects.filter(user=request.user, stage=stage).exists()
 
         return success_response(
             message="Hint access status.",
