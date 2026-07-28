@@ -3,7 +3,7 @@ services:
     build: .
     volumes:
       - .:/app
-      - ../ARC_Quiz:/app/ARC_Quiz:ro
+      - ./ARC_Quiz:/app/ARC_Quiz:ro
     expose:
       - "8000"
     env_file:

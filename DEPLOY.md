@@ -50,11 +50,10 @@ docker-compose -f docker-compose.prod.yml ps
 
 ## ARC Quiz Content
 
-ARC episode assets are not moved through Git. Copy them to the home server as a folder next to this repository:
+ARC episode assets are not moved through Git. Copy them to the home server inside this repository:
 
 ```text
-<deploy-parent>/
-  Clavis_TheCode_Server/
+Clavis_TheCode_Server/
   ARC_Quiz/
 ```
 
@@ -67,7 +66,7 @@ ARC_Quiz/arc.json
 From this repository, the compose files mount it read-only into the web container:
 
 ```text
-../ARC_Quiz:/app/ARC_Quiz:ro
+./ARC_Quiz:/app/ARC_Quiz:ro
 ```
 
 Copy from the Windows dev machine with `scp`, replacing the user and host:
@@ -79,8 +78,8 @@ scp -r C:\Dev\project\TheCode\ARC_Quiz user@home-server:/path/to/deploy-parent/
 Or from the home server, after placing the files by USB/SFTP/etc., verify:
 
 ```bash
-ls -la ../ARC_Quiz
-test -f ../ARC_Quiz/arc.json
+ls -la ARC_Quiz
+test -f ARC_Quiz/arc.json
 ```
 
 After the stack is running, validate the manifest and source images:
