@@ -48,6 +48,67 @@ Check container state:
 docker-compose -f docker-compose.prod.yml ps
 ```
 
+## ARC Quiz Content
+
+ARC episode assets are not moved through Git. Copy them to the home server as a folder next to this repository:
+
+```text
+<deploy-parent>/
+  Clavis_TheCode_Server/
+  ARC_Quiz/
+```
+
+The seed manifest is:
+
+```text
+ARC_Quiz/arc.json
+```
+
+From this repository, the compose files mount it read-only into the web container:
+
+```text
+../ARC_Quiz:/app/ARC_Quiz:ro
+```
+
+Copy from the Windows dev machine with `scp`, replacing the user and host:
+
+```powershell
+scp -r C:\Dev\project\TheCode\ARC_Quiz user@home-server:/path/to/deploy-parent/
+```
+
+Or from the home server, after placing the files by USB/SFTP/etc., verify:
+
+```bash
+ls -la ../ARC_Quiz
+test -f ../ARC_Quiz/arc.json
+```
+
+After the stack is running, validate the manifest and source images:
+
+```bash
+docker-compose -f docker-compose.prod.yml run --rm web \
+  python TheCode/manage.py seed_pie ARC_Quiz/arc.json --dry-run
+```
+
+Then seed or refresh the episode data and local media:
+
+```bash
+docker-compose -f docker-compose.prod.yml run --rm web \
+  python TheCode/manage.py seed_pie ARC_Quiz/arc.json
+```
+
+The seed command copies the question images into:
+
+```text
+TheCode/media/stages/arc/001/
+```
+
+Nginx serves them through:
+
+```text
+https://clavisapi.store/media/stages/arc/001/...
+```
+
 ## Cloudflare Tunnel
 
 Point the Cloudflare Tunnel public hostname for `clavisapi.store` to:
