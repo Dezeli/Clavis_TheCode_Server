@@ -29,6 +29,11 @@ GOOGLE_PLAY_SERVICE_ACCOUNT_JSON = config(
     default="",
 )
 
+LEGAL_APP_NAME = config("LEGAL_APP_NAME", default="The Code ARC")
+LEGAL_COMPANY_NAME = config("LEGAL_COMPANY_NAME", default="CLAVIS")
+LEGAL_CONTACT_EMAIL = config("LEGAL_CONTACT_EMAIL", default="clavis202512@gmail.com")
+LEGAL_EFFECTIVE_DATE = config("LEGAL_EFFECTIVE_DATE", default="2026\ub144 1\uc6d4 1\uc77c")
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
