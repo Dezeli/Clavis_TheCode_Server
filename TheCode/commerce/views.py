@@ -56,16 +56,29 @@ class GooglePlayPurchaseVerifyView(APIView):
             return error_response(str(exc), status=400)
 
         with transaction.atomic():
-            PurchaseEvent.objects.update_or_create(
+            purchase_event = PurchaseEvent.objects.filter(
                 purchase_token=purchase_token,
-                defaults={
-                    "user": request.user,
-                    "store": PurchaseEvent.STORE_GOOGLE_PLAY,
-                    "product_id": product_id,
-                    "order_id": payload.get("orderId"),
-                    "payload_json": payload,
-                },
-            )
+            ).select_for_update().first()
+
+            if purchase_event and purchase_event.user_id != request.user.id:
+                return error_response("Purchase token already belongs to another user.", status=409)
+
+            if purchase_event:
+                purchase_event.product_id = product_id
+                purchase_event.order_id = payload.get("orderId")
+                purchase_event.payload_json = payload
+                purchase_event.save(
+                    update_fields=["product_id", "order_id", "payload_json"],
+                )
+            else:
+                PurchaseEvent.objects.create(
+                    user=request.user,
+                    store=PurchaseEvent.STORE_GOOGLE_PLAY,
+                    product_id=product_id,
+                    purchase_token=purchase_token,
+                    order_id=payload.get("orderId"),
+                    payload_json=payload,
+                )
 
             for entitlement_type in PRODUCT_ENTITLEMENTS[product_id]:
                 UserEntitlement.objects.get_or_create(

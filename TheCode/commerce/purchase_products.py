@@ -1,5 +1,5 @@
 PRODUCT_PREMIUM_PACKAGE = "premium_package"
-PRODUCT_STAGE_UNLOCK = "stage_unlock"
+PRODUCT_STAGE_UNLOCK = "unlock_premium_stages"
 PRODUCT_REMOVE_ADS = "remove_ads"
 
 ENTITLEMENT_HINT_AD_REMOVAL = "hint_ad_removal"
