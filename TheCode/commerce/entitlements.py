@@ -15,6 +15,10 @@ def user_has_entitlement(user, entitlement_type):
     ).exists()
 
 
+def user_can_access_stage(user, stage):
+    return stage.is_free or user_has_entitlement(user, ENTITLEMENT_STAGE_UNLOCK)
+
+
 def serialize_entitlements(user):
     owned = set(
         UserEntitlement.objects.filter(

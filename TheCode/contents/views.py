@@ -1,7 +1,7 @@
 from urllib.parse import urljoin
 
 from commerce.models import UserStageHintAccess
-from commerce.entitlements import user_has_entitlement
+from commerce.entitlements import user_can_access_stage, user_has_entitlement
 from commerce.purchase_products import ENTITLEMENT_HINT_AD_REMOVAL
 from contents.models import Episode, Hint, Stage
 from django.conf import settings
@@ -83,6 +83,9 @@ class StageDetailView(APIView):
         except Stage.DoesNotExist:
             return error_response("스테이지가 존재하지 않습니다.", status=404)
 
+        if not user_can_access_stage(request.user, stage):
+            return error_response("Premium stage access is required.", status=403)
+
         next_stage = (
             Stage.objects.filter(
                 episode_id=episode_id,
@@ -127,6 +130,9 @@ class StageAnswerView(APIView):
         except Stage.DoesNotExist:
             return error_response("스테이지가 존재하지 않습니다.", status=404)
 
+        if not user_can_access_stage(request.user, stage):
+            return error_response("Premium stage access is required.", status=403)
+
         is_correct = normalize_answer(answer) == normalize_answer(stage.answer_text)
 
         if is_correct:
@@ -151,6 +157,9 @@ class StageHintView(APIView):
             )
         except Stage.DoesNotExist:
             return error_response("스테이지가 존재하지 않습니다.", status=404)
+
+        if not user_can_access_stage(request.user, stage):
+            return error_response("Premium stage access is required.", status=403)
 
         try:
             hint = stage.hint

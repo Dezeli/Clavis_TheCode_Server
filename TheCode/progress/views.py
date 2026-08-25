@@ -2,6 +2,7 @@ from django.utils import timezone
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
+from commerce.entitlements import user_can_access_stage
 from contents.models import Episode, Stage
 from progress.models import UserEpisodeProgress
 from utils.response import error_response, success_response
@@ -101,6 +102,9 @@ class CompleteStageView(APIView):
             )
         except Stage.DoesNotExist:
             return error_response("Stage does not exist.", status=404)
+
+        if not user_can_access_stage(request.user, stage):
+            return error_response("Premium stage access is required.", status=403)
 
         next_stage = (
             Stage.objects.filter(
